@@ -11,7 +11,10 @@ const tasks = JSON.parse(
 );
 
 taskRouter.get("/", (req: Request, res: Response, next: NextFunction) => {
-  res.json(tasks);
+  res.status(200).json({
+    data: tasks,
+    message: "Tasks successfully fetched",
+  });
 });
 
 taskRouter.post("/", (req: Request, res: Response) => {
@@ -20,7 +23,7 @@ taskRouter.post("/", (req: Request, res: Response) => {
   if (!validatedData.success) {
     const errorMsg = validatedData.error?.issues[0]?.message;
     return res.status(400).json({
-      error: "404 error",
+      error: "Bad Request",
       message: errorMsg ? errorMsg : "Please send correct data",
     });
   }
@@ -39,7 +42,7 @@ taskRouter.post("/", (req: Request, res: Response) => {
 
   return res.status(201).json({
     data: dataToAdd,
-    message: "Data added successfully",
+    message: "Task successfully added",
   });
 });
 
@@ -51,17 +54,17 @@ taskRouter.patch("/:id", (req: Request, res: Response) => {
   if (!validateData.success) {
     const errorMsg = validateData.error.issues[0]?.message;
     return res.status(400).json({
-      error: "404 error",
-      message: errorMsg ? errorMsg : "Please send correct data to update",
+      error: "Bad Request",
+      message: errorMsg || "Please send correct data to update",
     });
   }
 
   const updateTask = tasks.find((t: Task) => t.id == id);
 
   if (!updateTask) {
-    return res.status(400).json({
-      error: "400 error",
-      message: `No content with id ${id} found`,
+    return res.status(404).json({
+      error: "404 error",
+      message: `No task with id: ${id} found`,
     });
   }
 
@@ -75,9 +78,9 @@ taskRouter.patch("/:id", (req: Request, res: Response) => {
     path.join(__dirname, "../data/tasks.json"),
     JSON.stringify(tasks, null, 2),
   );
-  return res.status(201).json({
+  return res.status(200).json({
     data: updateData,
-    message: "data is updated",
+    message: "Task successfully updated",
   });
 });
 
@@ -85,9 +88,9 @@ taskRouter.delete("/:id", (req: Request, res: Response) => {
   const id = req.params.id;
   const taskToDelete = tasks.find((task: Task) => task.id == id);
   if (!taskToDelete) {
-    return res.status(400).json({
-      error: "400 error",
-      message: `No content with id ${id} found`,
+    return res.status(404).json({
+      error: "404 error",
+      message: `No task with id: ${id} found`,
     });
   }
 
@@ -98,8 +101,8 @@ taskRouter.delete("/:id", (req: Request, res: Response) => {
     JSON.stringify(data, null, 2),
   );
 
-  res.status(201).json({
-    message: "Data is deleted",
+  res.status(204).json({
+    message: "Task successfully deleted",
   });
 });
 
